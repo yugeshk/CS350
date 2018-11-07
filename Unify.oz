@@ -121,7 +121,7 @@ proc {UnifyInternal Expression1 Expression2 UnificationsDone}
       else
         {Raise incompatibleTypes(Expression1 Expression2)}
       end
-    end
+    else {Browse 'BadSituation'} end
   end
 end
 
