@@ -1,0 +1,19 @@
+
+
+% Bad but working truth checker
+%fun {CheckTrue Id Env Sas}
+%   case Id of nil then false
+%   [] ident(X) then
+%      local Temp in 
+%         Temp = {RetrieveFromSAS Env.X}
+%         case Temp of nil then false
+%         [] literal(L) then L\=0 orelse L == true  % Remember to copy to place COPYCHECKTRUEHERE
+%         [] reference(Y) then {CheckTrue {RetrieveFromSAS Y} Env Sas}
+%         else false
+%         end
+%      end
+%   [] literal(L) then L\=0 orelse L == true % This place is COPYCHECKTRUEHERE
+%   [] reference(Y) then {CheckTrue {RetrieveFromSAS Y} Env Sas}
+%   else false
+%   end
+%end

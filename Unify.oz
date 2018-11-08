@@ -16,17 +16,25 @@
 
 declare
 
+fun {FixUnify Id Environment}
+  case Id of reference(X) then
+    {FixUnify {RetrieveFromSAS X} Environment}
+  else Id  
+  end
+end
+
 %% Replaces every identifier with its key in the SAS store, or with
 %% its value, as needed. Remember that the SAS should never know about
 %% identifiers, only about other keys.
 fun {SubstituteIdentifiers Expression Environment}
   case Expression
-  of Head|Tail then
+  of procedure|Tail then {Browse 'ProcCaptured'#Tail} Expression
+  [] Head|Tail then
     %% It's a list, so recurse
     {SubstituteIdentifiers Head Environment} |
     {SubstituteIdentifiers Tail Environment}
   [] ident(X) then
-    {RetrieveFromSAS Environment.X}
+    {FixUnify {RetrieveFromSAS Environment.X} Environment}
   else
     Expression
   end
@@ -83,11 +91,11 @@ proc {UnifyInternal Expression1 Expression2 UnificationsDone}
       else
         {Raise incompatibleTypes(Expression1 Expression2)}
       end
-    [] record|Record1Label|Record1FeaturePairs then
+    [] record|Record1Label|Record1FeaturePairs|nil then
       %% Again, Expression2 is not an identifier. It has to be a literal
       %% or a record.
       case Expression2
-      of record|Record2Label|Record2FeaturePairs then
+      of record|Record2Label|Record2FeaturePairs|nil then
         %% The record labels have to be the same, and so do the feature
         %% pairs.
         if Record1Label == Record2Label andthen {IsAritySame Record1FeaturePairs
@@ -106,7 +114,7 @@ proc {UnifyInternal Expression1 Expression2 UnificationsDone}
                RealVal1 = Val1
              end
 
-             case Val2 of equivalence(X) then
+              case Val2 of equivalence(X) then
                RealVal2 = {RetrieveFromSAS X}
              else
                RealVal2 = Val2
@@ -116,10 +124,10 @@ proc {UnifyInternal Expression1 Expression2 UnificationsDone}
              unit
            end _}
         else
-          {Raise incompatibleTypes(Expression1 Expression2)}
+          {Raise incompatibleTypesDiffLabelOrArityInRecord(Expression1 Expression2)}
         end
       else
-        {Raise incompatibleTypes(Expression1 Expression2)}
+        {Raise incompatibleTypesForExp2(Expression1 Expression2)}
       end
     else {Browse 'BadSituation'} end
   end

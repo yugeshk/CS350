@@ -3,19 +3,19 @@ SAS = {Dictionary.new}
 {NewCell 0 ?C}
 
 fun {AddKeyToSAS}
-  {Browse 'AddKeyToSAS'}
+  %{Browse 'AddKeyToSAS'}
   C:=@C+1
   {Dictionary.put SAS @C equivalence(@C)}
   @C
 end
 
 fun {RetrieveFromSAS Key}
-  {Browse 'RetrieveFromSAS'}
+  %{Browse 'RetrieveFromSAS'}
   {Dictionary.get SAS Key ?} 
 end
 
 proc {BindValueToKeyInSAS Key Val}
-  {Browse 'BindValueToKeyInSAS'}
+  %{Browse 'BindValueToKeyInSAS'}
   local Value in
     {Dictionary.get SAS Key Value}
     case Value
@@ -26,7 +26,7 @@ proc {BindValueToKeyInSAS Key Val}
 end
 
 proc {BindRefToKeyInSAS Key RefKey}
-  {Browse 'BindRefToKeyInSAS'}
+  %{Browse 'BindRefToKeyInSAS'}
   local Value in
     {Dictionary.get SAS Key Value}
     case Value
@@ -39,5 +39,6 @@ end
 % Helper functions not part of the assgnment
 
 proc {PrintAll Current}
-  if Current > @C then {Browse 'Done'} else {Browse {Dictionary.get SAS Current ?}} {PrintAll Current+1} end
+  if Current == 1 then {Browse 'Printing Single Assigment Store:'} end
+  if Current > @C then {Browse 'Done Printing Single Assigment Store'} else {Browse {Dictionary.get SAS Current ?}} {PrintAll Current+1} end
 end
