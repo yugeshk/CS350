@@ -151,6 +151,55 @@ proc {GetEnvAndStatements Id ParameterList Env NewEnv NewStatements Sas}
   end
 end
 
+fun {AddAux Id1 Id2 Env Sas}
+  local Temp1 Temp2 in
+    case Id1 of nil then Temp1 = false
+    [] ident(X) then Temp1 = {RetrieveFromSAS Env.X}
+    else Temp1 = Id1
+    end
+
+    case Id2 of nil then Temp2 = false
+    [] ident(X) then Temp2 = {RetrieveFromSAS Env.X}
+    else Temp2 = Id2
+    end
+
+    case Temp1 of nil then nil
+    [] reference(Y1) then {AddAux {RetrieveFromSAS Y1} Temp2 Env Sas}
+    [] literal(Z1) then case Temp2 of nil then nil
+                        [] reference(Y2) then {AddAux Temp1 {RetrieveFromSAS Y2} Env Sas}
+                        [] literal(Z2) then literal(Z1 + Z2)
+                        else nil
+                        end
+    else nil
+    end
+  end
+end
+
+fun {MulAux Id1 Id2 Env Sas}
+  local Temp1 Temp2 in
+    case Id1 of nil then Temp1 = false
+    [] ident(X) then Temp1 = {RetrieveFromSAS Env.X}
+    else Temp1 = Id1
+    end
+
+    case Id2 of nil then Temp2 = false
+    [] ident(X) then Temp2 = {RetrieveFromSAS Env.X}
+    else Temp2 = Id2
+    end
+
+    case Temp1 of nil then nil
+    [] reference(Y1) then {AddAux {RetrieveFromSAS Y1} Temp2 Env Sas}
+    [] literal(Z1) then case Temp2 of nil then nil
+                        [] reference(Y2) then {AddAux Temp1 {RetrieveFromSAS Y2} Env Sas}
+                        [] literal(Z2) then literal(Z1 * Z2)
+                        else nil
+                        end
+    else nil
+    end
+  end
+end
+
+
 proc {Execute S O}
    local NewE NewS in
       case S of nil then skip
@@ -159,6 +208,8 @@ proc {Execute S O}
                     case Xs of nil then skip
    				          [] [nop]then {Execute T O}
    				          [] [var ident(V) S1] then {Adjoin Xe V NewE} {Execute es(s:S1 e:NewE)|T O}
+                    [] [add ident(Target) ident(S1) ident(S2)] then {Unify ident(Target) {AddAux ident(S1) ident(S2) Xe O} Xe} {Execute T O}
+                    [] [mul ident(Target) ident(S1) ident(S2)] then {Unify ident(Target) {MulAux ident(S1) ident(S2) Xe O} Xe} {Execute T O}
 
                     [] [bind ident(V1) ident(V2)] then {Browse 'var var bind'} {Unify ident(V1) ident(V2) Xe} {Execute T O}
                     [] [bind ident(V1) procedure|ParamList|Statements|nil] then {Browse 'Proc'#ParamList#Statements} {Unify ident(V1) [procedure ParamList Statements Xe] Xe} {Execute T O}
@@ -202,7 +253,18 @@ proc {Execute S O}
    end
 end
 
-
+Program =
+[var ident(x)
+  [var ident(y)
+    [var ident(z)
+     [
+      [bind ident(x) literal(2)]
+      [bind ident(y) literal(~3)]
+      [mul ident(z) ident(x) ident(y)]
+     ]
+    ]
+  ]
+]
 
 %Program = 
 %[var ident(x)
